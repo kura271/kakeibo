@@ -1,5 +1,5 @@
 // わが家の家計簿：オフラインで開くための仕組み（家計のデータはここを通りません）
-const VER = 'kakeibo-v1.11';
+const VER = 'kakeibo-v1.12';
 const APP = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/icon-180.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VER).then(c => c.addAll(APP)).then(() => self.skipWaiting()));

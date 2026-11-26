@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>わが家の家計簿 v1.11</title>
+<title>わが家の家計簿 v1.12</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="家計簿">
 <meta name="theme-color" content="#3e352d">
@@ -156,7 +156,7 @@ details.mj>summary small{color:#8A7F73;font-size:12px;white-space:nowrap}
 </head>
 <body>
 <div id="top">
-  <span class="ttl">わが家の家計簿</span><span class="ver">v1.11</span>
+  <span class="ttl">わが家の家計簿</span><span class="ver">v1.12</span>
   <span class="stat">今月の支出 <b id="tMon">¥0</b></span>
   <span class="sp"></span>
   <button id="tBk" onclick="openBk()" aria-label="保存"></button>
@@ -166,6 +166,7 @@ details.mj>summary small{color:#8A7F73;font-size:12px;white-space:nowrap}
 <main>
   <!-- 入力 -->
   <section id="s-in">
+    <div id="instNote"></div>
     <div id="notice"></div>
     <div class="chips" id="kindChips"></div>
     <div class="tiles" id="catTiles"></div>
@@ -980,10 +981,16 @@ function init(){
   // アプリ化：オフライン対応・データを消されにくくする・インストールボタン
   if('serviceWorker' in navigator&&(location.protocol==='https:'||/^(localhost|127\.0\.0\.1)$/.test(location.hostname)))navigator.serviceWorker.register('sw.js').catch(()=>{});
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-  addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e;$('instBtn').style.display='inline-block'});
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e;$('instBtn').style.display='inline-block';renderInstNote()});
+  addEventListener('appinstalled',()=>{instEv=null;renderInstNote();toast('インストールしました。ホーム画面のアイコンから開いてください')});
+  renderInstNote();
 }
 let instEv=null;
-async function doInstall(){if(!instEv)return toast('ブラウザのメニューから「ホーム画面に追加」を選んでください');instEv.prompt();await instEv.userChoice;instEv=null;$('instBtn').style.display='none'}
+const isApp=()=>matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
+function renderInstNote(){const b=$('instNote');if(!b)return;let off=false;try{off=localStorage.getItem('kakeibo_instNote')==='off'}catch(e){}
+  if(isApp()||off||!/^https:/.test(location.protocol)){b.innerHTML='';return}
+  b.innerHTML=`<div class="ok" style="display:flex;align-items:center;gap:8px;justify-content:space-between"><span>📲 アプリとしてインストールすると、アドレスバーなしの全画面で使えます${instEv?'':'<br><small>Chromeの「︙」→「アプリをインストール」から</small>'}</span><span style="display:flex;gap:6px;flex:none">${instEv?'<button class="btn2" onclick="doInstall()">インストール</button>':''}<button class="btn2" onclick="try{localStorage.setItem(\'kakeibo_instNote\',\'off\')}catch(e){};renderInstNote()">×</button></span></div>`}
+async function doInstall(){if(!instEv)return toast('ブラウザのメニューから「ホーム画面に追加」を選んでください');instEv.prompt();await instEv.userChoice;instEv=null;$('instBtn').style.display='none';renderInstNote()}
 init();
 </script>
 </body>
